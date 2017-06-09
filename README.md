@@ -2,7 +2,7 @@
 A tool to examine video and build algorithms. 
 
 ## License
-Penseive is covered by GPLv3 ![LICENSE](gpl_logo)
+Penseive is covered by ![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
 
 ## Requirements
 * Python 3.x
