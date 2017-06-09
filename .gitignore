@@ -103,6 +103,5 @@ ENV/
 # mypy
 .mypy_cache/
 samples/
-tests/
 /.idea/
 .idea/fileTemplates/
