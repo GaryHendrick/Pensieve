@@ -1,11 +1,11 @@
 # Pensieve
 A tool to examine video and build algorithms. 
 
-#License
+## License
 Penseive is covered by GPLv3 ![LICENSE](gpl_logo)
-# Requirements
+
+## Requirements
 * Python 3.x
-* PySide
 * Numpy
 * Matplotlib
 * Python bindings for OpenCV

@@ -64,7 +64,7 @@ class WindowController(object):
         super(WindowController, self).__init__()
         self.wname = window_name
 
-        #todo: button, mouse, etc.... callbacks 
+        #todo: button, mouse, etc.... callbacks
 
 class GuiManager(object):
     """ The manager contains information relevant to each window in the application. It is also responsible
