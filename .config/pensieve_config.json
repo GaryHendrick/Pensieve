@@ -1,0 +1,18 @@
+{
+  "version": 1.0,
+  "WindowConfig": {
+    "fullscreen": true,
+    "centered": true,
+    "width": 400,
+    "height": 300,
+    "style": "Cleanlooks",
+    "TheMainPreview": {
+      "fullscreen":false,
+      "width": "90%",
+      "height": "100%"
+    }
+  },
+  "TheModel":{
+    "source": ""
+  }
+}
