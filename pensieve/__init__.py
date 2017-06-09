@@ -42,6 +42,7 @@ if sys.version_info < (3,3): # fixme: check against requirements
 # setup the top level names
 #-----------------------------------------------------------------------------
 from .core import release
+import pensieve.core.application as application
 from .core.application import Divinator
 from .testing import test
 from .utils.sysinfo import sys_info
@@ -72,4 +73,4 @@ def start_pensieve(argv=None, **kwargs):
         Any other kwargs will be passed to the Application constructor,
         such as `config`.
     """
-    return Divinator.launch_new_instance(argv=argv, **kwargs)
+    return application.launch_new_instance(argv=argv, **kwargs)

@@ -7,12 +7,6 @@ import numpy as np
 from traitlets import Bool, Unicode, List, Integer, validate, TraitError, Instance
 from traitlets.config.configurable import Configurable
 
-from pensieve import Divinator
-
-
-class release():
-    pass
-
 class TheModel(Configurable):
     """ A model derived from the Traitlets API and built to support an observable pattern.
      The Configurable superclass permits theModel to be used
@@ -39,7 +33,8 @@ class TheModel(Configurable):
             raise TraitError('Illegal Destination specfied: {}'.format(proposal['value']))
 
     sourcemat = Instance(klass=np.ndarray)
-    piped_outputs = List(Instance)
+
+    piped_outputs = List(Instance(klass=np.ndarray))
 
     def __repr__(self) -> str:
         return super().__repr__()
