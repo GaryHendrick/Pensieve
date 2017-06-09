@@ -1,3 +1,38 @@
+# encoding: utf-8
+"""
+The application logic is embedded here
+"""
+#-----------------------------------------------------------------------------
+#  Copyright (c) 2017, Gary Hendrick.
+#
+#  This file is part of Pensieve.
+#
+#    Pensieve is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+
+#    Pensieve is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+
+#    You should have received a copy of the GNU General Public License
+#    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  The full license is in the file LICENSE, distributed with this software.
+#-----------------------------------------------------------------------------
+import logging
+import os
+import sys
+import traceback
+from copy import deepcopy
+
+from traitlets import Unicode, Bool, Dict, List
+from traitlets.config import Application
+
+from pensieve.model import WindowConfig, TheModel
+
 """
 Goal: Compose a UI which permits the analysis of a video stream.
 Requirements:
@@ -20,62 +55,8 @@ References:
 Note:
     I believe that I can use QAbstractVideoSurface, setting the video to started, and then setting the frame to present
     will allow me to play a video in Qt
-    
+
 """
-import logging
-import numbers
-import os
-import sys
-import traceback
-import urllib.parse
-from copy import deepcopy
-
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QStyleFactory
-from traitlets import Bool, Unicode, Dict, List, Integer, validate, TraitError
-from traitlets.config.configurable import Configurable
-
-class TheModel(Configurable):
-    """ A model derived from the Traitlets API and built to support an observable pattern.
-     The Configurable superclass permits theModel to be used
-    """
-    source = Unicode("", True, False, help='input filename to be initially loaded').tag(config=True)
-    @validate('source')
-    def _valid_source(self, proposal):
-        if isinstance(proposal['value'], numbers.Integral):
-            return str(proposal['value'])
-        elif not urllib.parse.urlparse(proposal['value']).scheme == "":
-            return proposal['value']
-        elif os.path.exists(proposal['value']) and not os.path.isdir(proposal['value']):
-            return proposal['value']
-        else:
-            raise TraitError('Illegal Source specfied: {}'.format(proposal['value']))
-
-    destination = Unicode(os.getcwd(), True, False, help='the output directory to be used to store data snapshots').tag(
-        config=True)
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-
-class WindowConfig(Configurable):
-    fullscreen = Bool(False, False, help='set the application to a fullscreen mode').tag(config=True)
-    centered = Bool(True, False, help='open the window centered').tag(config=True)
-    offsetx = Integer(200).tag(config=True)
-    offsety = Integer(200).tag(config=True)
-    width = Integer(600).tag(config=True)
-    height = Integer(400).tag(config=True)
-    style = Unicode('windows').tag(config=True)
-
-    name = Unicode(u'The Window')
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-
-from traitlets.config.application import Application
-
-
 class Divinator(Application):
     name = Unicode('divinator')
     description = Unicode('A tool for developing algorithms to transform and analyze imagery')
@@ -88,8 +69,7 @@ class Divinator(Application):
     config_file = Unicode(os.path.join(os.environ['HOMEPATH'], '.divinator', 'pensieve_config.json'),
                           help="a json formatted config file").tag(config=True)
     raise_config_file_errors = True
-    aliases = Dict(dict(
-        input="TheModel.source", destination="TheModel.destination", config="Divinator.config_file"))
+    aliases = Dict(dict(input="TheModel.source", destination="TheModel.destination", config="Divinator.config_file"))
 
     flags = Dict(dict(verbose=({'Divinator': {'is_verbose': True}}, "verbose output"),
                       v=({'Divinator': {'is_verbose': True}}, "verbose output"),
@@ -126,6 +106,7 @@ class Divinator(Application):
             self.init_the_window()
 
     def start(self):
+        # This is where we need to create the asyncio application and have it start up
         if self.is_headless:
             pass
         else:
@@ -137,10 +118,8 @@ class Divinator(Application):
                 print(self.model)
 
             try:
-                QCoreApplication.processEvents()
-
-                self.gui_app.exec_()
-
+                # start up the opencv business
+                # todo: determine the necessities for opengl support. config,
                 # If any settings are passed in to the application, they must be pushed into the applications
                 # the key here is to make this invocation/gui interaction seamless by actually pushing the change into
                 # the system model, rather than directly into the gui
@@ -160,26 +139,24 @@ class Divinator(Application):
         self.model = TheModel(parent=self)
 
     def init_the_window(self):
-        from pensieve.gui import TheWindow
         self.window_config = WindowConfig(parent=self)
-        self.gui_app = QApplication(sys.argv)
-        # style it ['Windows', 'WindowsXP', 'WindowsVista', 'Motif', 'CDE', 'Plastique', 'Cleanlooks']
-        if self.window_config.style in QStyleFactory.keys():
-            print(f"applying style {self.window_config.style}")
-            self.gui_app.setStyle(QStyleFactory.create(self.window_config.style))
-        self.win = TheWindow(model=self.model, config=self.window_config)
 
     def init_crash_handler(self):  # todo: implement a crash handler
         pass
 
+    @classmethod
+    def launch_instance(cls, argv=None, **kwargs):
+        """Launch a global instance of this Application
 
-# main function
-def main():
-    # Create an Application which will be a shared between cli and gui invocations of the system
-    app = Divinator()
-    app.initialize()
-    app.start()
+        If a global instance already exists, this reinitializes and starts it
+        """
+        app = cls.instance(**kwargs)
+        app.initialize(argv)
+        app.start()
 
-# Module Invocation
+
+launch_new_instance = Divinator.launch_instance
+
+
 if __name__ == '__main__':
-    main()
+    launch_new_instance()
