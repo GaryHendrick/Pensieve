@@ -21,7 +21,7 @@ The application logic is embedded here
 #    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  The full license is in the file LICENSE, distributed with this software.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 import logging
 import os
 import sys
@@ -31,6 +31,7 @@ from copy import deepcopy
 from traitlets import Unicode, Bool, Dict, List
 from traitlets.config import Application
 
+from pensieve.gui import GuiContext
 from pensieve.model import WindowConfig, TheModel
 
 """
@@ -114,18 +115,22 @@ class Divinator(Application):
                 print("app.config")
                 print("-" * 60)
                 print(self.config)
-                print(self.window_config)
-                print(self.model)
+                print(self._window_config)
+                print(self._model)
 
             try:
                 # start up the opencv business
                 # todo: determine the necessities for opengl support. config,
+
                 # If any settings are passed in to the application, they must be pushed into the applications
                 # the key here is to make this invocation/gui interaction seamless by actually pushing the change into
                 # the system model, rather than directly into the gui
 
-                # this is where I leave the application and move on with my life.
-                sys.exit()
+                # create a GuiContext and hold onto it
+                self._gui_context = GuiContext(self._model, config=self._window_config.config)
+
+                # launch the gui look
+                self._gui_context.start()
             except NameError:
                 print("Name Error:", sys.exc_info()[1])
             except SystemExit:
@@ -136,10 +141,10 @@ class Divinator(Application):
                 traceback.print_exc(file=sys.stdout)
 
     def init_the_model(self):
-        self.model = TheModel(parent=self)
+        self._model = TheModel(parent=self)
 
     def init_the_window(self):
-        self.window_config = WindowConfig(parent=self)
+        self._window_config = WindowConfig(parent=self)
 
     def init_crash_handler(self):  # todo: implement a crash handler
         pass

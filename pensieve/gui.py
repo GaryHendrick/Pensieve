@@ -29,7 +29,19 @@ gui module : controlers and views for use in the pensieve gui
 import os
 
 import cv2
-from pensieve.model import TheModel, WindowConfig
+from traitlets.config import Application, HasTraits, Bool, observe
+
+from pensieve.model import TheModel
+# -----------------------------------------------------------------------------
+#   Imports
+# -----------------------------------------------------------------------------
+import os
+
+import cv2
+from traitlets.config import Application, HasTraits, Bool, observe
+
+from pensieve.model import TheModel
+
 
 class IconPath(object):
     """ A simple means of encapsulating the locations of icons """
@@ -83,6 +95,8 @@ class WindowHandle(object):
         self.id = id
 
 
+WHANDLE_ALL = WindowHandle(-1)
+
 class WindowController(object):
     """ The controller has to handle the gui related callbacks, forwarding those requests back down stream via the
     model, or simply updating the ui appropriately, and also, monitor the model for appropriate changes coming up
@@ -94,15 +108,46 @@ class WindowController(object):
 
         #todo: button, mouse, etc.... callbacks
 
-class GuiManager(object):
+
+class ControlPanel(object):
+    def __init__(self, context, *args, **kwargs) -> None:
+        super().__init__()
+        self.context = context
+        self._wname = "control_panel"
+        self._wname_foo = "foo"
+
+    def show(self):
+        cv2.namedWindow(self._wname)
+        cv2.createTrackbar(self._wname_foo, self._wname, 1, 1, self.on_foo_change)
+
+    def on_foo_change(self, state, userdata):
+        print(f"on_foo_change clicked with {state} and {userdata}")
+        self.context.close_window()
+
+
+class GuiContext(Application):
     """ The manager contains information relevant to each window in the application. It is also responsible
      for registering model callbacks to the controllers that it creates, and managing the relationship of controllers to
      views.
 
      Use the GuiMangager to configure the gui.
      """
-    def __init__(self, model:TheModel, config:WindowConfig) -> None:
-        super(GuiManager, self).__init__()
+    is_displayed = Bool(False)
+
+    @observe('is_displayed')
+    def _observe_is_displayed(self, change: dict):
+        self._model.is_displayed = change['new']
+
+    def __init__(self, model: TheModel, *args, **kwargs) -> None:
+        super(GuiContext, self).__init__(*args, **kwargs)
+        self._model = model if model is not None else HasTraits()
+        self.init_model()
+        self.build_components()
+
+    def init_model(self):
+        """ called during initialization.  The traits of this object will be added to the traits of the __init__
+        supplied model """
+        self._model.add_traits(**self.traits())
 
     def init_source_window(self):
         pass
@@ -111,11 +156,28 @@ class GuiManager(object):
         handle = WindowHandle(id())
         return handle
 
-    def launch(self):
-        pass
+    def start(self):
+        # todo: pass opencv's ui into either asyncio or another thread
+        cv2.namedWindow(self._wname, cv2.WINDOW_GUI_EXPANDED)
+        self._control_panel.show()
+        self.is_displayed = True
 
     def add_window(self) -> WindowHandle:
         pass
 
     def close(self):
         cv2.destroyAllWindows()
+
+    def build_control_panel(self):
+        self._control_panel = ControlPanel(context=self)
+
+    def build_components(self):
+        self._wname = "guicontext"
+        self.build_control_panel()
+
+    def close_window(self, handle=WHANDLE_ALL):
+        if handle == WHANDLE_ALL:
+            cv2.destroyAllWindows()
+            self.is_displayed = False
+        else:
+            cv2.destroyWindow(self.opened_windows[handle])

@@ -2,6 +2,8 @@
 ## End-To-End Test
 * Object Notification Integrity Test - Launch Application and Monitor Application for Update Indicating Button Click in GUI
 
+the class `TestDivnatorEndToEnd` in the module `pensieve.core.tests` contains the test `test_launch_and_click`
+
 ## Unit Testing
 ### TheModel testing HasTraits object notifications 
 * test_observer_x - mock an observer for x and modify x, confirming the mock's observations
