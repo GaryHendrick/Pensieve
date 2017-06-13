@@ -48,7 +48,7 @@ from .testing import test
 from .utils.sysinfo import sys_info
 
 # Release data
-__author__ = f'{release.author}, {release.author_email}'
+__author__ = '{release.author}, {release.author_email}'.format(release=release)
 __license__ = release.license
 __version__ = release.version
 version_info = release.version_info
