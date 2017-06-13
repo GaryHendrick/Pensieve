@@ -26,7 +26,12 @@ Testing for the Application Divinator resides here.  As this is the Application 
 and end-to-end tests included here.
 """
 import time
+import unittest
 from unittest import TestCase
+
+from traitlets import HasTraits
+
+from pensieve import Divinator
 
 
 class TestDivinatorEndToEnd(TestCase):
@@ -50,20 +55,42 @@ class TestDivinatorEndToEnd(TestCase):
 
 
 class TestDivinatorUnit(TestCase):
+    """ Unit tests for the Divinator application """
+
+    def setUp(self):
+        self.app = Divinator()
+        self.app.initialize()
+
     def test_initialize(self):
-        self.fail("unimplemented")
+        self.assertIsInstance(self.app._model, HasTraits)
+        # todo: add a greater degree of initialization testing, i.e. how about ensuring that the config system is ok
 
     def test_start(self):
+        # I should be testing an event loop here
+        self.app.start()
         self.fail("unimplemented")
 
-    def test_init_the_model(self):
-        self.fail("unimplemented")
-
-    def test_init_the_config(self):
-        self.fail("unimplemented")
-
+    @unittest.skip('skipping until we get into worrying about a crash handler')
     def test_init_crash_handler(self):
         self.fail("unimplemented")
 
-    def test_launch_instance(self):
+    def test_open_video(self):
+        self.fail("unimplemented")
+
+    def test_iterate_video(self):
+        self.fail("unimplemented")
+
+    def test_watch_iteration(self):
+        self.fail("unimplemented")
+
+    def test_pipleine_builder(self):
+        # todo: likely too course grained a test.  Instead of this, consider adding methods such as add/remove layer
+        self.fail("unimpmented")
+
+    def test_pipeline_transport(self):
+        """ assert that the data moves through the pipeline effectively """
+        self.fail("unimplemented")
+
+    def test_pipeline_product(self):
+        """ assert the results of a pipeline of transformations """
         self.fail("unimplemented")
