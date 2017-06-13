@@ -26,12 +26,7 @@ gui module : controlers and views for use in the pensieve gui
 #-----------------------------------------------------------------------------
 #   Imports
 #-----------------------------------------------------------------------------
-import os
 
-import cv2
-from traitlets.config import Application, HasTraits, Bool, observe
-
-from pensieve.model import TheModel
 # -----------------------------------------------------------------------------
 #   Imports
 # -----------------------------------------------------------------------------
@@ -121,7 +116,7 @@ class ControlPanel(object):
         cv2.createTrackbar(self._wname_foo, self._wname, 1, 1, self.on_foo_change)
 
     def on_foo_change(self, state, userdata):
-        print(f"on_foo_change clicked with {state} and {userdata}")
+        print("on_foo_change clicked with {state} and {userdata}".format(state=state, userdata=userdata))
         self.context.close_window()
 
 
