@@ -102,7 +102,7 @@ class Divinator(Application):
         self.init_the_model()
         # before interacting further with the model, build up the appopriate interfaces
         if self.is_headless:
-            print(F'running in headless mode')
+            print('running in headless mode')
         else:
             self.init_the_window()
 
