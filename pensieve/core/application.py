@@ -28,9 +28,11 @@ import sys
 import traceback
 from copy import deepcopy
 
+import cv2
 from traitlets import Unicode, Bool, Dict, List
 from traitlets.config import Application
 
+from pensieve import cvtools
 from pensieve.gui import GuiContext
 from pensieve.model import WindowConfig, TheModel
 
@@ -58,6 +60,42 @@ Note:
     will allow me to play a video in Qt
 
 """
+
+
+class CaptureContext(object):
+    """ A context manager built to handle context issues associated with a cv2.VideoCapture """
+
+    def __init__(self, source: str, args, kwds):
+        super().__init__(args, kwds)
+        self.source = source
+
+    def __enter__(self):
+        """ The returned value becomes bound to the 'as' target """
+        self.cap = cv2.VideoCapture(self.source)
+        return CaptureIterable(self.cap)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ These actions are taken as the 'with' scope is exited """
+        self.cap.release()
+        return super().__exit__(exc_type, exc_value, traceback)
+
+
+class CaptureIterable(object):
+    """ The CaptureIterable is an abc.Iterable designed to support the Iterable pattern for cv2.VideoCapture
+     objects.
+    """
+
+    def __init__(self, capture: cv2.VideoCapture):
+        super(CaptureIterable, self).__init__()
+        self.cap = capture
+
+    def __repr__(self):
+        return 'VideoCapture({})'.format(repr(self.cap))
+
+    def __iter__(self):
+        while self.cap.isOpened():
+            yield self.cap.read()[1]  # return only the frame, dropping ret
+
 class Divinator(Application):
     name = Unicode('divinator')
     description = Unicode('A tool for developing algorithms to transform and analyze imagery')
@@ -159,6 +197,17 @@ class Divinator(Application):
         app.initialize(argv)
         app.start()
 
+    ####################################################################################################################
+    #   application api
+    ####################################################################################################################
+    def open_input(self):
+        self._cap = cv2.VideoCapture(self._model.source)
+        self._model.cap_props = cvtools.CaptureProperties(self._cap)
+
+    def scan_input(self):
+        with CaptureContext(self._model.source) as it:
+            for mat in it:
+                self._model.sourcemat = mat
 
 launch_new_instance = Divinator.launch_instance
 
