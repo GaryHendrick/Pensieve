@@ -34,6 +34,21 @@ import numpy as np
 from traitlets import Bool, Unicode, List, Integer, validate, TraitError, Instance
 from traitlets.config.configurable import Configurable
 
+from pensieve.cvtools import CaptureProperties
+# -----------------------------------------------------------------------------
+#   Imports
+# -----------------------------------------------------------------------------
+import numbers
+import os
+import urllib.parse
+
+import numpy as np
+from traitlets import Bool, Unicode, List, Integer, validate, TraitError, Instance
+from traitlets.config.configurable import Configurable
+
+from pensieve.cvtools import CaptureProperties
+
+
 class TheModel(Configurable):
     """ A model derived from the Traitlets API and built to support an observable pattern.
      The Configurable superclass permits theModel to be used
@@ -59,6 +74,7 @@ class TheModel(Configurable):
         else:
             raise TraitError('Illegal Destination specfied: {}'.format(proposal['value']))
 
+    cap_props = Instance(klass=CaptureProperties)
     sourcemat = Instance(klass=np.ndarray)
 
     piped_outputs = List(Instance(klass=np.ndarray))
