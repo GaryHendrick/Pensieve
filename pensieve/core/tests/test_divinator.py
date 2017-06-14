@@ -75,10 +75,10 @@ class TestDivinatorUnit(TestCase):
         self.fail("unimplemented")
 
     def test_open_video(self):
-        self.fail("unimplemented")
+        self.app.open_input()
 
     def test_iterate_video(self):
-        self.fail("unimplemented")
+        self.app.scan_input()
 
     def test_watch_iteration(self):
         self.fail("unimplemented")
