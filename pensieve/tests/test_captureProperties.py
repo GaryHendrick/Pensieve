@@ -21,11 +21,42 @@
 # -----------------------------------------------------------------------------
 """ CaptureProperties is a thin wrapper around the cv2.VideoCapture passed in through its constructor
 and """
-
+from functools import partial
+from itertools import starmap, chain
+from os import walk, listdir, getenv
+from os.path import isfile, join, exists, isdir
 from unittest import TestCase
+
+import cv2
 
 
 class TestCaptureProperties(TestCase):
+    searchpath = []
+    resource_dir = "samples"
+    sample_names = ["SampleVideo_176x144_1mb.3gp",
+               "SampleVideo_1280x720_1mb.flv",
+               "SampleVideo_1280x720_1mb.mkv",
+               "SampleVideo_1280x720_1mb.mp4"]
+    samples = []
+
+    def find_samples(self):
+        self.searchpath = getenv("PYTHONPATH").split(';')
+        search_paths = list(filter(isdir, filter(exists, map(join, self.searchpath,
+                           (self.resource_dir for i in range(len(self.searchpath)))))))
+        samples = [join(path, name) for name in filter(isfile, chain.from_iterable(map(listdir, search_paths)))
+                   if name in self.sample_names for path in search_paths]
+        for path in search_paths:
+            print (path)
+            for sample in self.samples:
+                join(sample, self.resource_dir)
+
+    def setUp(self):
+        self.find_samples()
+        self.cap = cv2.VideoCapture()
+
+    def tearDown(self):
+        pass
+
     def test_time(self):
         self.fail()
 
