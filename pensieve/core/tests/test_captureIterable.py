@@ -59,7 +59,7 @@ class TestCaptureIterable(VideoTestCase):
         finally:
             self.assertEqual('GEN_CLOSED', inspect.getgeneratorstate(it), 'iterator not in GEN_CLOSED state')
         self.assertEqual(self.cap.get(cv2.CAP_PROP_FRAME_COUNT), self.cap.get(cv2.CAP_PROP_POS_FRAMES),
-                         'iteration check failed on {}'.format(self.video))
+                         'frame count is not equal to frame position: iteration check failed on {}'.format(self.video))
 
 
 class TestIterateMp4(TestCaptureIterable):
