@@ -23,6 +23,22 @@
 
 from unittest import TestCase
 
+import cv2
+
+from pensieve.core.application import CaptureContext
+
 
 class TestCaptureContext(TestCase):
-    pass
+    matcount = 100
+
+    def test_camera_iteration_context(self):
+        context = CaptureContext(0)
+        with context as capturable:
+            i = 0
+            self.assertTrue(context._cap.isOpened())
+            self.assertTrue(context._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            for mat in capturable:
+                self.assertTrue(mat.any())
+                i +=1
+                if i == 100: break
+        self.assertFalse(context._cap.isOpened())
