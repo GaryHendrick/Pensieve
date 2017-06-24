@@ -105,10 +105,10 @@ class WindowController(object):
 
 
 class ControlPanel(object):
+    _wname = "control_panel"
     def __init__(self, context, *args, **kwargs) -> None:
         super().__init__()
         self.context = context
-        self._wname = "control_panel"
         self._wname_foo = "foo"
 
     def show(self):
@@ -153,7 +153,6 @@ class GuiContext(Application):
 
     def start(self):
         # todo: pass opencv's ui into either asyncio or another thread
-        cv2.namedWindow(self._wname, cv2.WINDOW_GUI_EXPANDED)
         self._control_panel.show()
         self.is_displayed = True
 
@@ -167,7 +166,6 @@ class GuiContext(Application):
         self._control_panel = ControlPanel(context=self)
 
     def build_components(self):
-        self._wname = "guicontext"
         self.build_control_panel()
 
     def close_window(self, handle=WHANDLE_ALL):
