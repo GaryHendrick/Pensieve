@@ -20,6 +20,10 @@ mocked observation in observer_x~
 * Test Methods used to write those iterations to TheModel
 * Build a processing pipeline and pass data in one end to observe predictable change throughout
 
+### CaptureProperties
+* ~test accessors~
+* ~test setters~
+
 ### WindowControl Tests
 * Test throughput of events from gui to gui context
 * Destroy yourself and observe the destruction

@@ -30,7 +30,6 @@ class CaptureProperties(object):
 
     def __init__(self, capture: cv2.VideoCapture):
         super(CaptureProperties, self).__init__()
-
         self._cap = capture
         self._fcount = 0
 
@@ -63,21 +62,16 @@ class CaptureProperties(object):
         else:
             return self._cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
-    @fcount.setter
-    def fcount(self, value):
-        if self._cap.get(cv2.CAP_PROP_FRAME_COUNT) < 0:
-            self._fcount = value
-        else:
-            self._cap.set(cv2.CAP_PROP_FRAME_COUNT, value)
+    @property
+    def length_ms(self):
+        try :
+            return float(1000) * float(self.fcount) / float(self.fps)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def progress(self):
-        result = self._cap.get(cv2.CAP_PROP_POS_AVI_RATIO)
-        if self.fcount == 0: return result
-        if result < 1.0 / self.fcount:
-            return 0.0
-        else:
-            return result
+        return self._cap.get(cv2.CAP_PROP_POS_AVI_RATIO)
 
     @progress.setter
     def progress(self, value):
@@ -112,6 +106,11 @@ class CaptureProperties(object):
 
     @property
     def codec(self):
+        """ This fails testing right now, I'll need to get back to it.  It's not the most important thing
+        in the world right now. The byte values that I get out of this are all wrong. """
+        # import struct
+        # foo = struct.unpack('cccc', struct.pack('f', self._cap.get(cv2.CAP_PROP_FOURCC)))
+        # bar = cv2.VideoWriter_fourcc(foo[0].decode(), foo[1].decode(), foo[2].decode(), foo[3].decode())
         return self._cap.get(cv2.CAP_PROP_FOURCC)
 
     @property
@@ -120,7 +119,7 @@ class CaptureProperties(object):
 
     @vformat.setter
     def vformat(self, value):
-        return self._cap.set(cv2.CAP_PROP_FORMAT, value)
+        self._cap.set(cv2.CAP_PROP_FORMAT, value)
 
     def __repr__(self):
         return "{self.__class__.__name__}({self.width}x{self.height}@{self.fps}fps in {self.codec} in {self.vformat})".format(

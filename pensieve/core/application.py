@@ -93,8 +93,15 @@ class CaptureIterable(object):
         return 'VideoCapture({})'.format(repr(self.cap))
 
     def __iter__(self):
+        """ implemented as a generator to provide a means of iterating the frames of a cap.
+        """
         while self.cap.isOpened():
-            yield self.cap.read()[1]  # return only the frame, dropping ret
+            ret, frame = self.cap.read()
+            yield frame # return only the frame, dropping ret
+            if not ret:
+                raise StopIteration()
+        else:
+            raise StopIteration()
 
 class Divinator(Application):
     name = Unicode('divinator')
