@@ -26,6 +26,7 @@ import logging
 import os
 import sys
 import traceback
+from contextlib import contextmanager
 from copy import deepcopy
 
 import cv2
@@ -65,19 +66,20 @@ Note:
 class CaptureContext(object):
     """ A context manager built to handle context issues associated with a cv2.VideoCapture """
 
-    def __init__(self, source: str, args, kwds):
-        super().__init__(args, kwds)
+    def __init__(self, source: str, *args, **kwds):
         self.source = source
 
     def __enter__(self):
         """ The returned value becomes bound to the 'as' target """
-        self.cap = cv2.VideoCapture(self.source)
-        return CaptureIterable(self.cap)
+        self._cap = cv2.VideoCapture(self.source)
+        return CaptureIterable(self._cap)
 
     def __exit__(self, exc_type, exc_value, traceback):
         """ These actions are taken as the 'with' scope is exited """
-        self.cap.release()
-        return super().__exit__(exc_type, exc_value, traceback)
+        self._cap.release()
+        if exc_type is not None:
+            print(exc_type, exc_value, traceback)
+            return True
 
 
 class CaptureIterable(object):
@@ -152,7 +154,7 @@ class Divinator(Application):
             self.init_the_window()
 
     def start(self):
-        # This is where we need to create the asyncio application and have it start up
+        # highgui handles our needs, vis-a-vis the gui and threading.
         if self.is_headless:
             pass
         else:
@@ -165,7 +167,6 @@ class Divinator(Application):
 
             try:
                 # start up the opencv business
-                # todo: determine the necessities for opengl support. config,
 
                 # If any settings are passed in to the application, they must be pushed into the applications
                 # the key here is to make this invocation/gui interaction seamless by actually pushing the change into
