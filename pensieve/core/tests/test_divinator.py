@@ -29,11 +29,14 @@ import time
 import unittest
 from unittest import TestCase
 
+import cv2
 from traitlets import HasTraits
 
 from pensieve import Divinator
+from pensieve.gui import ControlPanel
+from pensieve.testing.cases import root, resourced
 
-
+@unittest.skip("This is the full cycle test for this moment")
 class TestDivinatorEndToEnd(TestCase):
     """ The TestCase for Divinator's end to end tests """
 
@@ -53,22 +56,58 @@ class TestDivinatorEndToEnd(TestCase):
         self.assertFalse(app._model.is_displayed,
                          'The Ui is Still Opened, any change that there is no thread handler ?')
 
+@unittest.skip("cycle back to this configuration testing stuff, it's important")
+@root('.config')
+class TestDivinatorUnitConfiguration(TestCase):
+    """ Unit tests for the Divinator application """
 
-class TestDivinatorUnit(TestCase):
+    @resourced('pensieve_config.json')
+    def setUp(self):
+        self.app = Divinator.instance()
+
+    def test_defaults(self):
+        # todo: add a greater degree of initialization testing, i.e. how about ensuring that the config system is ok
+        self.fail("unimplemented")
+
+    def test_defaults(self):
+        self.fail("unimplemented")
+
+    def test_config_file_cli(self):
+        self.fail("unimplemented")
+
+    def test_config_file_verbose(self):
+        self.fail("unimplemented")
+
+    def test_cli_verbose(self):
+        self.fail("unimplemented")
+
+    def test_config_file_test(self):
+        self.fail("unimplemented")
+
+    def test_cli_test(self):
+        self.fail("unimplemented")
+
+    def test_config_file_headless(self):
+        self.fail("unimplemented")
+
+    def test_cli_headless(self):
+        self.fail("unimplemented")
+
+    def test_cli_source(self):
+        self.fail("unimplemented")
+
+class TestDivinatorUnitHighGuiLifecycle(TestCase):
     """ Unit tests for the Divinator application """
 
     def setUp(self):
-        self.app = Divinator()
+        self.app = Divinator.instance()
         self.app.initialize()
-
-    def test_initialize(self):
-        self.assertIsInstance(self.app._model, HasTraits)
-        # todo: add a greater degree of initialization testing, i.e. how about ensuring that the config system is ok
 
     def test_start(self):
         # I should be testing an event loop here
         self.app.start()
-        self.fail("unimplemented")
+        self.assertTrue(self.app._model.is_displayed)
+        self.assertTrue(cv2.getWindowProperty(ControlPanel._wname, cv2.WND_PROP_VISIBLE))
 
     @unittest.skip('skipping until we get into worrying about a crash handler')
     def test_init_crash_handler(self):
@@ -76,9 +115,11 @@ class TestDivinatorUnit(TestCase):
 
     def test_open_video(self):
         self.app.open_input()
+        self.fail("unimplemented")
 
     def test_iterate_video(self):
         self.app.scan_input()
+        self.fail("unimplemented")
 
     def test_watch_iteration(self):
         self.fail("unimplemented")
