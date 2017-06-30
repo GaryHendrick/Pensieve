@@ -2,7 +2,7 @@
 """
 The application logic is embedded here
 """
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #  Copyright (c) 2017, Gary Hendrick.
 #
 #  This file is part of Pensieve.
@@ -22,11 +22,11 @@ The application logic is embedded here
 #
 #  The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
+import asyncio
 import logging
 import os
 import sys
 import traceback
-from contextlib import contextmanager
 from copy import deepcopy
 
 import cv2
@@ -99,17 +99,17 @@ class CaptureIterable(object):
         """
         while self.cap.isOpened():
             ret, frame = self.cap.read()
-            yield frame # return only the frame, dropping ret
+            yield frame  # return only the frame, dropping ret
             if not ret:
                 raise StopIteration()
-        else:
-            raise StopIteration()
+
 
 class Divinator(Application):
     name = Unicode('divinator')
     description = Unicode('A tool for developing algorithms to transform and analyze imagery')
     version = Unicode('0.1')  # todo: see ipython's release.py for a more robust handling of the version question
 
+    is_initialized = Bool(False)
     is_running = Bool(False, help="Is the app running?").tag(config=True)
     is_verbose = Bool(False, False, help="verbose output").tag(config=True)
     is_headless = Bool(False, False, help="execute the application headlessly").tag(config=True)
@@ -132,6 +132,8 @@ class Divinator(Application):
     classes = List([WindowConfig, TheModel])
 
     def initialize(self, argv=None):
+        if self.is_initialized:
+            return  # todo: print a warning regarding multiple calls to initialize
         self.parse_command_line(argv)
         self.init_crash_handler()
 
@@ -153,6 +155,18 @@ class Divinator(Application):
         else:
             self.init_the_window()
 
+        self.is_initialized = True
+
+    @asyncio.coroutine
+    def gui_task(self):
+        """ this task will block during the call to cv2.waitKey.  As a result, it is important that it be
+        run in a subprocess.  A signal must be available to stop this coroutine and provide an exit for the
+        loop """
+        while self.is_running:
+            cv2.waitKey(1 / 50)
+        yield from asyncio.sleep(0.1)
+
+    @asyncio.coroutine
     def start(self):
         # highgui handles our needs, vis-a-vis the gui and threading.
         if self.is_headless:
@@ -166,17 +180,31 @@ class Divinator(Application):
                 print(self._model)
 
             try:
-                # start up the opencv business
+                # this is where we want to loop all coroutines which end up in the task set
+                # start up the asyncio event loop, and grab appropriate handles, etc... to be certain that
+                # it can be managed as the application requires.
+                if sys.platform == 'win32':
+                    self._loop = asyncio.ProactorEventLoop()
+                    asyncio.set_event_loop(self._loop)
+                else:
+                    self._loop = asyncio.get_event_loop()
+
+                self._tasks = dict()
+                ## build the chain of tasks.  These should be run indefinitely, but without blocking
+                self._tasks['gui'] = self._loop.create_task(self.gui_task)  # poll user input for a keystroke
+                self._tasks['play_video'] = None  # update video display at appropriate speed
+                self._tasks['processing_pipeline'] = None  # pipeline for video processing
 
                 # If any settings are passed in to the application, they must be pushed into the applications
                 # the key here is to make this invocation/gui interaction seamless by actually pushing the change into
                 # the system model, rather than directly into the gui
-
                 # create a GuiContext and hold onto it
                 self._gui_context = GuiContext(self._model, config=self._window_config.config)
 
                 # launch the gui look
                 self._gui_context.start()
+
+                self._loop.run_forever()
             except NameError:
                 print("Name Error:", sys.exc_info()[1])
             except SystemExit:
@@ -185,6 +213,10 @@ class Divinator(Application):
                 print(sys.exc_info()[1])
                 print("-" * 60)
                 traceback.print_exc(file=sys.stdout)
+
+    def stop(self):
+        self._loop.run_until_complete(self._loop.shutdown_asyncgens())
+        self._loop.close()
 
     def init_the_model(self):
         self._model = TheModel(parent=self)
@@ -217,8 +249,8 @@ class Divinator(Application):
             for mat in it:
                 self._model.sourcemat = mat
 
-launch_new_instance = Divinator.launch_instance
 
+launch_new_instance = Divinator.launch_instance
 
 if __name__ == '__main__':
     launch_new_instance()

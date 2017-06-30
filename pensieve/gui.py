@@ -33,7 +33,7 @@ gui module : controlers and views for use in the pensieve gui
 import os
 
 import cv2
-from traitlets.config import Application, HasTraits, Bool, observe
+from traitlets.config import HasTraits, Bool, observe, Configurable
 
 from pensieve.model import TheModel
 
@@ -120,7 +120,7 @@ class ControlPanel(object):
         self.context.close_window()
 
 
-class GuiContext(Application):
+class GuiContext(Configurable):
     """ The manager contains information relevant to each window in the application. It is also responsible
      for registering model callbacks to the controllers that it creates, and managing the relationship of controllers to
      views.

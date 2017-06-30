@@ -25,16 +25,18 @@
 Testing for the Application Divinator resides here.  As this is the Application itself, there are both unit tests
 and end-to-end tests included here.
 """
+import asyncio
+import logging
 import time
 import unittest
 from unittest import TestCase
 
 import cv2
-from traitlets import HasTraits
 
 from pensieve import Divinator
 from pensieve.gui import ControlPanel
 from pensieve.testing.cases import root, resourced
+
 
 @unittest.skip("This is the full cycle test for this moment")
 class TestDivinatorEndToEnd(TestCase):
@@ -98,14 +100,37 @@ class TestDivinatorUnitConfiguration(TestCase):
 
 class TestDivinatorUnitHighGuiLifecycle(TestCase):
     """ Unit tests for the Divinator application """
-
     def setUp(self):
+        logging.basicConfig(level=logging.DEBUG)
         self.app = Divinator.instance()
         self.app.initialize()
 
+    def tearDown(self):
+        self.app.stop()
+
     def test_start(self):
-        # I should be testing an event loop here
+        @asyncio.coroutine
+        def test_start():
+            # I should be testing an event loop here
+            self.app.queue_task()
+            self.app._loop.assertFalse(self.app._loop.is_running())
+            self.assertFalse(self.app._model.is_running)
+            self.app._loop.is_closed()
         self.app.start()
+
+    def test_stop(self):
+        @asyncio.coroutine
+        def test_stop():
+            # I should be testing an event loop here
+            self.app.stop()
+            self.app._loop.assertFalse(self.app._loop.is_running())
+            self.assertFalse(self.app._model.is_running)
+            self.app._loop.is_closed()
+            self.fail("find the means to test if everything is stopped")
+
+        self.app.start()
+
+    def test_control_panel_displayed(self):
         self.assertTrue(self.app._model.is_displayed)
         self.assertTrue(cv2.getWindowProperty(ControlPanel._wname, cv2.WND_PROP_VISIBLE))
 

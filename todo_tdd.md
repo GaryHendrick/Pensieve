@@ -13,16 +13,22 @@ mocked observation in observer_x~
     be clear that a scope local `HasTraits` will be defined, and the traits of TheModel must be caught.~
 
 ### Divinator (traitlets Application) tests
-* Signal to GuiContext to close and delete windows
-* Signal to GuiContext to open and create windows
-* Test Methods used to Iterate the OpenCV VideoSource
-    * test the iterator's identity as an abc.Iterator
-* Test Methods used to write those iterations to TheModel
+* Signal to App to start and confirm that appropriate threading, or whatever, is going on
+* Signal to App to stop and confirm that eventing is stopped
+* Signal to App close and delete windows
+* Signal to App open and create windows
+* Open Video, and Iterate it, observing changes in TheModel
 * Build a processing pipeline and pass data in one end to observe predictable change throughout
 
 ### CaptureProperties
 * ~test accessors~
 * ~test setters~
+
+### CaptureGenerator (CaptureIterator) tests
+* ~test iter~
+    * ~Test Methods used to Iterate the OpenCV VideoSource~
+        * ~test the iterator's identity as an abc.Iterator~
+* ~test next~
 
 ### WindowControl Tests
 * Test throughput of events from gui to gui context

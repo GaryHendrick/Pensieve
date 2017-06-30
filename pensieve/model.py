@@ -23,23 +23,15 @@ Models : traitlets Configurables and HasTraits used as models for object notific
 #  The full license is in the file LICENSE, distributed with this software.
 #-----------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #   Imports
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 import numbers
 import os
+# -----------------------------------------------------------------------------
+#   Imports
+# -----------------------------------------------------------------------------
 import urllib.parse
-
-import numpy as np
-from traitlets import Bool, Unicode, List, Integer, validate, TraitError, Instance
-from traitlets.config.configurable import Configurable
-
-from pensieve.cvtools import CaptureProperties
-# -----------------------------------------------------------------------------
-#   Imports
-# -----------------------------------------------------------------------------
-import numbers
-import os
 import urllib.parse
 
 import numpy as np
@@ -54,6 +46,7 @@ class TheModel(Configurable):
      The Configurable superclass permits theModel to be used
     """
     source = Unicode("", True, False, help='input filename to be initially loaded').tag(config=True)
+
     @validate('source')
     def _valid_source(self, proposal):
         if isinstance(proposal['value'], numbers.Integral):
@@ -67,6 +60,7 @@ class TheModel(Configurable):
 
     destination = Unicode(os.getcwd(), True, False, help='the output directory to be used to store data snapshots').tag(
         config=True)
+
     @validate('destination')
     def _valid_destination(selfself, proposal):
         if os.path.exists(proposal['value']) and os.path.isdir(proposal['value']) and os.access(proposal['value'], os.W_OK):
